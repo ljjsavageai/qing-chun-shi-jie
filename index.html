@@ -1012,7 +1012,7 @@
           });
         } else if (state.tag){
           results = classified.filter(function(c){
-            return c.info && (categoryOf(c.info.category).label===state.tag || c.info.tags.indexOf(state.tag)>=0);
+            return c.info && ((c.info.category ? categoryOf(c.info.category).label : "")===state.tag || c.info.tags.indexOf(state.tag)>=0);
           });
         }
         if (results){
