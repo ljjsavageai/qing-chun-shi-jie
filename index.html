@@ -1063,17 +1063,20 @@
       var todayP = countFetch('qingchun-shijie-day-' + today, hit);
       totalP.then(function(v){ var el=document.getElementById('vcTotal'); if(el) el.textContent = (v===null?'–':v); });
       todayP.then(function(v){ var el=document.getElementById('vcToday'); if(el) el.textContent = (v===null?'–':v); });
-      // 本月 = 当月每天的计数相加（每天一个独立计数器）
-      var now = new Date(), y = now.getFullYear(), mo = now.getMonth();
-      var jobs = [];
-      for (var d=1; d<=now.getDate(); d++){
-        var ds = y + '-' + ((mo+1)<10?'0':'') + (mo+1) + '-' + (d<10?'0':'') + d;
-        jobs.push(countFetch('qingchun-shijie-day-' + ds, false));
+      // 本月 = 当月每天的计数相加（每天一个独立计数器）；等今日计数先记完再算，避免本月少算今天
+      function calcMonth(){
+        var now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+        var jobs = [];
+        for (var d=1; d<=now.getDate(); d++){
+          var ds = y + '-' + ((mo+1)<10?'0':'') + (mo+1) + '-' + (d<10?'0':'') + d;
+          jobs.push(countFetch('qingchun-shijie-day-' + ds, false));
+        }
+        Promise.all(jobs).then(function(vals){
+          var sum = 0; vals.forEach(function(v){ if(v) sum += v; });
+          var el=document.getElementById('vcMonth'); if(el) el.textContent = sum;
+        });
       }
-      Promise.all(jobs).then(function(vals){
-        var sum = 0; vals.forEach(function(v){ if(v) sum += v; });
-        var el=document.getElementById('vcMonth'); if(el) el.textContent = sum;
-      });
+      todayP.then(function(){ calcMonth(); setTimeout(calcMonth, 3000); });
     }
     function recordShopView(slot){
       if (!slot || slot.kind!=='shop') return;
