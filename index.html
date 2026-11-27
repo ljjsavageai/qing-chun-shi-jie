@@ -1024,29 +1024,23 @@
       return d.getFullYear() + '-' + (m<10?'0':'') + m + '-' + (day<10?'0':'') + day;
     }
     function initSiteViews(){
+      // 计数全部延后跑，不跟街面、图片抢网速；三个数各一个独立计数器，只查 3 次
+      var run = function(){
       var today = localDateStr(new Date());
       var seenKey = 'qsj-counted-' + today;
       var seen = localStorage.getItem(seenKey);
       var hit = !seen;
       if (hit) localStorage.setItem(seenKey, '1');
+      var ym = today.slice(0, 7);
       var totalP = countFetch('qingchun-shijie-total', hit);
       var todayP = countFetch('qingchun-shijie-day-' + today, hit);
+      var monthP = countFetch('qingchun-shijie-month-' + ym, hit);
       totalP.then(function(v){ var el=document.getElementById('vcTotal'); if(el) el.textContent = (v===null?'–':v); });
       todayP.then(function(v){ var el=document.getElementById('vcToday'); if(el) el.textContent = (v===null?'–':v); });
-      // 本月 = 当月每天的计数相加（每天一个独立计数器）；等今日计数先记完再算，避免本月少算今天
-      function calcMonth(){
-        var now = new Date(), y = now.getFullYear(), mo = now.getMonth();
-        var jobs = [];
-        for (var d=1; d<=now.getDate(); d++){
-          var ds = y + '-' + ((mo+1)<10?'0':'') + (mo+1) + '-' + (d<10?'0':'') + d;
-          jobs.push(countFetch('qingchun-shijie-day-' + ds, false));
-        }
-        Promise.all(jobs).then(function(vals){
-          var sum = 0; vals.forEach(function(v){ if(v) sum += v; });
-          var el=document.getElementById('vcMonth'); if(el) el.textContent = sum;
-        });
-      }
-      todayP.then(function(){ setTimeout(calcMonth, 2000); });
+      monthP.then(function(v){ var el=document.getElementById('vcMonth'); if(el) el.textContent = (v===null?'–':v); });
+      };
+      if ('requestIdleCallback' in window) requestIdleCallback(run, {timeout: 2000});
+      else setTimeout(run, 1000);
     }
     function recordShopView(slot){
       if (!slot || slot.kind!=='shop') return;
