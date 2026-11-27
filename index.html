@@ -147,6 +147,13 @@
       .face.dashed{border-style:dashed;border-color:#a9bda9}
       .face.large{height:128px}
       .face.sel{border-color:var(--accent)}
+      /* 骰子摇中后“就吃这家”：先定位到店铺标签，边框用它自己的颜色发亮闪两下再开详情 */
+      .slot-glow{animation:slot-glow 1.5s ease-in-out;position:relative;z-index:5}
+      @keyframes slot-glow{
+        0%,100%{box-shadow:0 1px 2px rgba(0,0,0,.06)}
+        25%,75%{box-shadow:0 0 0 3px var(--glow,#ffc800),0 0 24px 8px var(--glow-soft,rgba(255,180,0,.7));filter:brightness(1.1)}
+        50%{box-shadow:0 1px 2px rgba(0,0,0,.06)}
+      }
       .chip{width:2rem;height:2rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:.5rem;
         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:700;background:#eef3ea;color:#40513f}
       .chip.filled{background:var(--green);color:#fff}
@@ -278,7 +285,7 @@
       .zoom-x{position:absolute;right:.75rem;top:.75rem;border-radius:999px;background:rgba(0,0,0,.5);padding:.25rem .75rem;font-size:1.25rem;line-height:1;color:#fff;z-index:2}
 
       @media (prefers-reduced-motion: reduce){
-        .dice-rolling,.dice-result-pop,.dice-bounce{animation:none}
+        .dice-rolling,.dice-result-pop,.dice-bounce,.slot-glow{animation:none}
       }
     
       .street-loading{text-align:center;padding:2.2rem 1rem 1.6rem;color:#8a6d3b;font-size:1rem}
@@ -941,7 +948,34 @@
         });
       });
       var rb = document.getElementById("diceResultBtn");
-      if (rb) rb.addEventListener("click", function(){ openDetail(diceResult.slot); });
+      if (rb) rb.addEventListener("click", function(){ goToShopAndOpen(diceResult.slot); });
+    }
+    /* ── 骰子摇中后点“就吃这家”：收起骰子 → 滚动定位到街上那家店 → 标签边框金光闪两下 → 再点开详情 ── */
+    function goToShopAndOpen(slot){
+      var s = slot;
+      diceOpen = false; diceResult = null; catPicker = false; renderDice();
+      var btn = document.querySelector('#westCol [data-open="'+s.id+'"], #eastCol [data-open="'+s.id+'"]');
+      if (!btn){ openDetail(s); return; }
+      var face = btn.querySelector('.face') || btn;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* 发光用标签自己的边框色；精品店是彩虹渐变边框，取不到单色就用金色 */
+      var bc = window.getComputedStyle(face).borderTopColor;
+      if (!bc || bc === 'rgba(0, 0, 0, 0)' || bc === 'transparent'){ bc = '#d9a514'; }
+      var soft = bc;
+      var m = bc.match(/rgba?\(([^)]+)\)/);
+      if (m){ var p = m[1].split(','); soft = 'rgba('+p[0].trim()+','+p[1].trim()+','+p[2].trim()+',0.65)'; }
+      face.style.setProperty('--glow', bc);
+      face.style.setProperty('--glow-soft', soft);
+      btn.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
+      window.setTimeout(function(){
+        face.classList.add('slot-glow');
+        window.setTimeout(function(){
+          face.classList.remove('slot-glow');
+          face.style.removeProperty('--glow');
+          face.style.removeProperty('--glow-soft');
+          openDetail(s);
+        }, reduce ? 80 : 1500);
+      }, reduce ? 80 : 650);
     }
     function rollDice(die, category){
       if (rolling) return;
