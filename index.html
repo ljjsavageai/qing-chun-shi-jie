@@ -816,7 +816,7 @@
     document.getElementById("qrVoteBtn").addEventListener("click", function(){ openQr("vote"); });
 
     /* ── 开屏广告：只放小枝寻花店海报 ── */
-    var adPending = true;
+    var adPending = false; // 开屏广告已关闭 2026-11-27
     function showAdIfPending(){
       if (!adPending) return;
       if (overlayRoot.innerHTML) return;
@@ -1095,7 +1095,6 @@
 
     renderStreet();
     initSiteViews();
-    showAdIfPending();
     </script>
   </body>
 </html>
