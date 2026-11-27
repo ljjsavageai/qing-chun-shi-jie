@@ -6,6 +6,19 @@
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="data:," />
     <title>青春食街（公开版）</title>
+    <meta name="description" content="一条街，吃遍上百家！民师院 × 崇幼美食街，广西崇左市江州区佛子路23号，329个铺位，摇骰子选吃的。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="青春食街" />
+    <meta property="og:title" content="青春食街 | 民师院 × 崇幼美食街" />
+    <meta property="og:description" content="一条街，吃遍上百家！广西崇左佛子路23号，329个铺位，摇骰子选吃的。" />
+    <meta property="og:url" content="https://ljjsavageai.github.io/qing-chun-shi-jie/" />
+    <meta property="og:image" content="https://ljjsavageai.github.io/qing-chun-shi-jie/street-bg.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="2240" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="青春食街 | 民师院 × 崇幼美食街" />
+    <meta name="twitter:description" content="一条街，吃遍上百家！广西崇左佛子路23号，329个铺位，摇骰子选吃的。" />
+    <meta name="twitter:image" content="https://ljjsavageai.github.io/qing-chun-shi-jie/street-bg.webp" />
     <style>
       :root{
         --bg:#f4f6f1; --surface:#ffffff; --text:#22312a; --dim:#68766d;
@@ -265,6 +278,12 @@
       .street-loading .dots i:nth-child(2){animation-delay:.15s}
       .street-loading .dots i:nth-child(3){animation-delay:.3s}
       @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-.45rem)}}
+      /* ── Back to top ─────────────────────────── */
+      .back-top{position:fixed;right:1rem;bottom:1.25rem;z-index:40;width:2.75rem;height:2.75rem;border-radius:50%;
+        background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+        box-shadow:0 2px 10px rgba(0,0,0,.18);outline:1px solid var(--border);font-size:1.25rem;line-height:1;
+        display:none;align-items:center;justify-content:center}
+      .back-top.show{display:flex}
 </style>
   </head>
   <body>
@@ -1067,6 +1086,16 @@
 
     renderStreet();
     initSiteViews();
+    </script>
+    <button type="button" id="backTop" class="back-top" aria-label="回到顶部">↑</button>
+    <script>
+      (function(){
+        var btn = document.getElementById('backTop');
+        function toggle(){ btn.classList.toggle('show', window.scrollY > 600); }
+        window.addEventListener('scroll', toggle, {passive:true});
+        toggle();
+        btn.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+      })();
     </script>
   </body>
 </html>
