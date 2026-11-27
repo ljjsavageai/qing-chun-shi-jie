@@ -823,12 +823,13 @@
       }
       var detail = "";
       if (slot.kind==="shop"){
+        var tip = '补充或反馈请联系网页最上面的客服二维码';
         var sign = slot.name==="茶瀑布"
           ? '<img class="sign-img" loading="lazy" src="cha-pubu-sign.jpg" alt="茶瀑布店面招牌照片：绿色招牌上白色大字“茶瀑布”，旁边写着“原叶鲜奶茶”" />'
-          : '<div class="placeholder tall">招牌照片待补充</div>';
+          : '<div class="placeholder tall">'+tip+'</div>';
         detail = '<div class="detail-sec"><h3>招牌</h3>'+sign+'</div>'
-          + '<div class="detail-sec"><h3>菜单</h3><div class="placeholder">菜单待补充</div></div>'
-          + '<div class="detail-sec"><h3>特色菜</h3><div class="placeholder tall">特色菜照片待补充</div></div>';
+          + '<div class="detail-sec"><h3>菜单</h3><div class="placeholder">'+tip+'</div></div>'
+          + '<div class="detail-sec"><h3>特色菜</h3><div class="placeholder tall">'+tip+'</div></div>';
       }
       overlayRoot.innerHTML =
         '<div class="overlay" role="dialog" aria-modal="true" aria-label="铺位 '+slot.code+' 详情">'
