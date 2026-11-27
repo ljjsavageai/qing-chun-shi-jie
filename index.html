@@ -478,7 +478,8 @@
       white:{frame:"#c9cfc4",bg:"#ffffff",chip:"#5c6f62"},
       pink:{frame:"#dd7ba6",bg:"#fdeef4",chip:"#c2537f"},
       purple:{frame:"#8a5fb0",bg:"#f2ebfa",chip:"#6d4396"},
-      orange:{frame:"#e07f2e",bg:"#fdf0e0",chip:"#c4641a"}
+      orange:{frame:"#e07f2e",bg:"#fdf0e0",chip:"#c4641a"},
+      black:{frame:"#222222",bg:"#f0f0f0",chip:"#111111"}
     };
     var COLOR_KEYS = ["red","blue","yellow","green","white","pink","purple","orange"];
     (function assignColors(){
@@ -555,7 +556,14 @@
       if (result.length===0) result.push(DEFAULT_TAG[category]);
       return result;
     }
-    function classifyShop(name){
+    /* 用户 2026-11-27 在文字表里逐家改定的分类/小标签/颜色（按编号，覆盖按店名推断的规则） */
+    var USER_OVERRIDES = {"E01":{c:"bbq",t:["烧烤"],col:"pink"}, "E02":{c:"drinks",t:["甜点蛋糕"],col:"yellow"}, "E03":{c:"bbq",t:["鸭腿"],col:"orange"}, "E06":{c:"snacks",t:["粉"],col:"green"}, "E07":{c:"stirfry",t:["饭"],col:"red"}, "E08":{c:"snacks",t:["云饺", "饺子"],col:"pink"}, "E09":{c:"hotpot",t:["火锅"],col:"red"}, "E100":{c:"stirfry",t:["牛杂"],col:"red"}, "E102":{c:"drinks",t:["饮品"],col:"blue"}, "E104":{c:"drinks",t:["饮品"],col:"white"}, "E105":{c:"snacks",t:["寿司"],col:"red"}, "E106":{c:"snacks",t:["饼"],col:"green"}, "E107":{c:"drinks",t:["饮品"],col:"red"}, "E108":{c:"snacks",t:["寿司", "一元"],col:"white"}, "E109":{c:"snacks",t:["炒粉"],col:"purple"}, "E110":{c:"snacks",t:["寿司"],col:"white"}, "E111":{c:"stirfry",t:["猪脚饭", "饭"],col:"green"}, "E112":{c:"bbq",t:["饼"],col:"pink"}, "E113":{c:"stirfry",t:["牛杂"],col:"purple"}, "E115":{c:"stirfry",t:["烧烤"],col:"green"}, "E116":{c:"snacks",t:["炒粉", "炒饭"],col:"blue"}, "E118":{c:"bbq",t:["鸭腿"],col:"red"}, "E119":{c:"snacks",t:["炒粉"],col:"purple"}, "E12":{c:"hotpot",t:["粉"],col:"red"}, "E120":{c:"snacks",t:["肉片"],col:"purple"}, "E121":{c:"stirfry",t:["牛杂"],col:"green"}, "E122":{c:"bbq",t:["烧烤"],col:"red"}, "E123":{c:"drinks",t:["甜点蛋糕"],col:"purple"}, "E125":{c:"snacks",t:["鸭腿"],col:"blue"}, "E126":{c:"noodles",t:["粉"],col:"pink"}, "E128":{c:"noodles",t:["粉"],col:"white"}, "E129":{c:"noodles",t:["粉"],col:"red"}, "E131":{c:"noodles",t:["粉"],col:"orange"}, "E132":{c:"drinks",t:["饮品"],col:"purple"}, "E133":{c:"noodles",t:["面"],col:"orange"}, "E134":{c:"snacks",t:["鸭货"],col:"purple"}, "E135":{c:"noodles",t:["饺子"],col:"purple"}, "E136":{c:"snacks",t:["饼"],col:"yellow"}, "E137":{c:"snacks",t:["饼"],col:"orange"}, "E138":{c:"noodles",t:["饼"],col:"yellow"}, "E14":{c:"bbq",t:["烧烤"],col:"blue"}, "E140":{c:"drinks",t:["饼"],col:"blue"}, "E141":{c:null,t:["饮品"],col:"white"}, "E142":{c:"drinks",t:["甜点蛋糕"],col:"green"}, "E143":{c:"bbq",t:["一元"],col:"orange"}, "E144":{c:"drinks",t:["饮品"],col:"yellow"}, "E145":{c:"snacks",t:["包子"],col:"orange"}, "E146":{c:"stirfry",t:["饭"],col:"purple"}, "E148":{c:"noodles",t:["云吞"],col:"green"}, "E149":{c:"snacks",t:["小吃"],col:"orange"}, "E15":{c:"snacks",t:["鸭腿"],col:"blue"}, "E150":{c:"snacks",t:["鸭货"],col:"yellow"}, "E151":{c:"noodles",t:["粉"],col:"pink"}, "E152":{c:"hotpot",t:["粉"],col:"red"}, "E153":{c:"drinks",t:["饮品"],col:"pink"}, "E154":{c:"snacks",t:["炒粉", "炒饭"],col:"rainbow"}, "E155":{c:"drinks",t:["饮品"],col:"white"}, "E156":{c:"noodles",t:["饺子", "云吞"],col:"red"}, "E157":{c:"bbq",t:["炸物"],col:"green"}, "E158":{c:"snacks",t:["小吃"],col:"blue"}, "E159":{c:"drinks",t:["饮品"],col:"red"}, "E161":{c:"noodles",t:["云吞", "粥"],col:"white"}, "E162":{c:"drinks",t:["甜点蛋糕"],col:"white"}, "E163":{c:"drinks",t:["甜点蛋糕"],col:"red"}, "E164":{c:"noodles",t:["粥"],col:"blue"}, "E165":{c:"noodles",t:["面"],col:"pink"}, "E166":{c:"noodles",t:["粉"],col:"green"}, "E167":{c:"stirfry",t:["牛杂"],col:"green"}, "E168":{c:"noodles",t:["粥", "粉"],col:"blue"}, "E169":{c:"bbq",t:["小吃"],col:"white"}, "E170":{c:"noodles",t:["粉"],col:"yellow"}, "E171":{c:"drinks",t:["饮品"],col:"white"}, "E172":{c:"bbq",t:["烧烤"],col:"red"}, "E173":{c:"snacks",t:["寿司"],col:"purple"}, "E174":{c:"bbq",t:["鸭腿"],col:"pink"}, "E176":{c:"snacks",t:["饭"],col:"pink"}, "E177":{c:"stirfry",t:["牛杂"],col:"yellow"}, "E179":{c:"drinks",t:["甜点蛋糕"],col:"purple"}, "E180":{c:"drinks",t:["饮品"],col:"red"}, "E181":{c:"drinks",t:["水果"],col:"green"}, "E185":{c:"snacks",t:["年糕"],col:"red"}, "E186":{c:"snacks",t:["小吃"],col:"pink"}, "E187":{c:"snacks",t:["炒粉", "炒饭"],col:"red"}, "E188":{c:"bbq",t:["鸭腿"],col:"orange"}, "E19":{c:"hotpot",t:["粉"],col:"red"}, "E190":{c:"snacks",t:["臭豆腐"],col:"rainbow"}, "E192":{c:"bbq",t:["烤面筋"],col:"red"}, "E193":{c:"bbq",t:["烤面筋"],col:"green"}, "E195":{c:"drinks",t:["饮品"],col:"orange"}, "E198":{c:"snacks",t:["炒粉", "炒饭"],col:"purple"}, "E199":{c:"noodles",t:["粉"],col:"blue"}, "E20":{c:"hotpot",t:["麻辣烫", "冒菜"],col:"blue"}, "E23":{c:"noodles",t:["粉"],col:"purple"}, "E24":{c:"snacks",t:["土豆"],col:"yellow"}, "E25":{c:"noodles",t:["云吞", "饺子"],col:"white"}, "E27":{c:"bbq",t:["小吃"],col:"green"}, "E28":{c:"bbq",t:["一元", "烧烤"],col:"white"}, "E29":{c:"drinks",t:["饮品"],col:"blue"}, "E30":{c:"snacks",t:["臭豆腐"],col:"yellow"}, "E31":{c:"bbq",t:["炸物"],col:"purple"}, "E32":{c:"snacks",t:["炒饭"],col:"pink"}, "E33":{c:"bbq",t:["炸物"],col:"white"}, "E34":{c:"noodles",t:["粉"],col:"green"}, "E35":{c:"hotpot",t:["冬阴功"],col:"purple"}, "E36":{c:"noodles",t:["肠粉"],col:"red"}, "E37":{c:"bbq",t:["炸物"],col:"orange"}, "E38":{c:"bbq",t:["炸物"],col:"pink"}, "E39":{c:"bbq",t:["小吃"],col:"green"}, "E40":{c:"bbq",t:["鸭腿"],col:"white"}, "E41":{c:"snacks",t:["小吃"],col:"pink"}, "E42":{c:"drinks",t:["甜点蛋糕"],col:"orange"}, "E50":{c:"drinks",t:["饮品"],col:"yellow"}, "E52":{c:"snacks",t:["臭豆腐"],col:"pink"}, "E53":{c:"snacks",t:["小吃"],col:"orange"}, "E54":{c:"drinks",t:["甜点蛋糕"],col:"yellow"}, "E55":{c:"drinks",t:["甜点蛋糕"],col:"orange"}, "E56":{c:"noodles",t:["粉", "面"],col:"yellow"}, "E57":{c:"drinks",t:["饮品"],col:"white"}, "E58":{c:"snacks",t:["酸嘢"],col:"red"}, "E62":{c:"snacks",t:["鸡爪"],col:"green"}, "E63":{c:"snacks",t:["卷筒粉"],col:"green"}, "E64":{c:"snacks",t:["凉拌菜"],col:"purple"}, "E68":{c:"snacks",t:["寿司", "一元"],col:"pink"}, "E69":{c:"snacks",t:["卷筒粉"],col:"yellow"}, "E70":{c:"snacks",t:["炒粉"],col:"yellow"}, "E72":{c:"drinks",t:["甜点蛋糕"],col:"red"}, "E73":{c:"noodles",t:["饼"],col:"orange"}, "E75":{c:"bbq",t:["炸物"],col:"pink"}, "E76":{c:"drinks",t:["甜点蛋糕"],col:"yellow"}, "E77":{c:"snacks",t:["臭豆腐"],col:"purple"}, "E78":{c:"drinks",t:["甜点蛋糕", "饼"],col:"blue"}, "E79":{c:"hotpot",t:["粉"],col:"white"}, "E80":{c:"drinks",t:["甜点蛋糕", "饼"],col:"purple"}, "E81":{c:"snacks",t:["小吃"],col:"purple"}, "E83":{c:null,t:[],col:"black"}, "E84":{c:"bbq",t:["小吃"],col:"orange"}, "E85":{c:"snacks",t:["臭豆腐"],col:"green"}, "E86":{c:"snacks",t:["卷筒粉"],col:"yellow"}, "E87":{c:"snacks",t:["豆腐"],col:"pink"}, "E88":{c:"snacks",t:["豆浆油条"],col:"orange"}, "E89":{c:"snacks",t:["土豆"],col:"purple"}, "E91":{c:"snacks",t:["卤味"],col:"white"}, "E92":{c:"noodles",t:["饺子", "云吞"],col:"pink"}, "E93":{c:"snacks",t:["炒粉", "炒饭"],col:"red"}, "E94":{c:"stirfry",t:["猪脚饭", "饭"],col:"purple"}, "E95":{c:"snacks",t:["炒粉", "炒饭"],col:"red"}, "E96":{c:"noodles",t:["包子"],col:"blue"}, "E97":{c:"snacks",t:["鸡腿"],col:"blue"}, "E98":{c:"bbq",t:["炸串"],col:"yellow"}, "E99":{c:"snacks",t:["卤味"],col:"yellow"}, "W01":{c:"snacks",t:["零食", "便宜", "百货"],col:"red"}, "W02":{c:"bbq",t:["烤面筋类", "辣"],col:"yellow"}, "W03":{c:"drinks",t:["饮品"],col:"green"}, "W04":{c:"drinks",t:["饮品", "甘蔗"],col:"green"}, "W05":{c:"drinks",t:["饮品"],col:"pink"}, "W06":{c:"snacks",t:["饺子", "云吞"],col:"orange"}, "W07":{c:"noodles",t:["粉"],col:"red"}, "W08":{c:"snacks",t:["寿司"],col:"green"}, "W09":{c:"snacks",t:["炒粉", "炒饭"],col:"white"}, "W10":{c:"drinks",t:["水果", "水果捞"],col:"white"}, "W100":{c:null,t:["炒饭"],col:"green"}, "W106":{c:"hotpot",t:["自助", "火锅"],col:"blue"}, "W109":{c:"stirfry",t:["炒菜"],col:"red"}, "W11":{c:"noodles",t:["粉"],col:"red"}, "W111":{c:null,t:["炒菜"],col:"yellow"}, "W114":{c:"hotpot",t:["冒菜"],col:"white"}, "W12":{c:"snacks",t:["一元", "卤味"],col:"orange"}, "W13":{c:"hotpot",t:["粉"],col:"red"}, "W14":{c:"snacks",t:["鸭货", "卤味"],col:"pink"}, "W15":{c:"hotpot",t:["粉"],col:"red"}, "W16":{c:"snacks",t:["小吃", "生蚝"],col:"white"}, "W17":{c:"snacks",t:["小吃"],col:"orange"}, "W18":{c:"snacks",t:["炒饭"],col:"yellow"}, "W23":{c:"snacks",t:["凉拌菜"],col:"green"}, "W24":{c:"snacks",t:["卤味"],col:"orange"}, "W25":{c:"snacks",t:["鸡"],col:"orange"}, "W26":{c:"noodles",t:["粉"],col:"red"}, "W28":{c:"bbq",t:["烧烤"],col:"white"}, "W29":{c:"bbq",t:["烧烤"],col:"blue"}, "W30":{c:"bbq",t:["烧烤"],col:"purple"}, "W32":{c:"bbq",t:["烧烤"],col:"purple"}, "W34":{c:"bbq",t:["烧烤"],col:"blue"}, "W35":{c:null,t:["烧烤"],col:"green"}, "W36":{c:"bbq",t:["烧烤"],col:"orange"}, "W37":{c:"hotpot",t:["火锅"],col:"yellow"}, "W39":{c:"drinks",t:["酒"],col:"pink"}, "W42":{c:null,t:[],col:"black"}, "W43":{c:null,t:[],col:"red"}, "W44":{c:null,t:[],col:"black"}, "W45":{c:"stirfry",t:["牛蛙"],col:"blue"}, "W46":{c:"drinks",t:["水果", "水果捞"],col:"orange"}, "W47":{c:null,t:[],col:"green"}, "W48":{c:"drinks",t:["甜点蛋糕"],col:"blue"}, "W49":{c:null,t:[],col:"orange"}, "W50":{c:"hotpot",t:["火锅"],col:"white"}, "W51":{c:"drinks",t:["甜点蛋糕"],col:"green"}, "W52":{c:"stirfry",t:["炒菜"],col:"blue"}, "W53":{c:"hotpot",t:["火锅"],col:"yellow"}, "W54":{c:null,t:[],col:"black"}, "W55":{c:"snacks",t:["饮品"],col:"red"}, "W56":{c:"stirfry",t:["炒菜"],col:"purple"}, "W57":{c:"noodles",t:["粉"],col:"blue"}, "W58":{c:"bbq",t:["炸物"],col:"yellow"}, "W59":{c:"drinks",t:["水果", "水果捞"],col:"blue"}, "W60":{c:"snacks",t:["鸭货"],col:"white"}, "W62":{c:null,t:[],col:"pink"}, "W63":{c:"snacks",t:["零食"],col:"green"}, "W64":{c:"noodles",t:["粉"],col:"yellow"}, "W65":{c:"stirfry",t:["鸡公煲"],col:"blue"}, "W66":{c:"drinks",t:["饮品"],col:"orange"}, "W68":{c:"drinks",t:["饮品"],col:"green"}, "W69":{c:"drinks",t:["饮品"],col:"purple"}, "W70":{c:"hotpot",t:["粉"],col:"red"}, "W71":{c:"noodles",t:["面"],col:"blue"}, "W72":{c:"drinks",t:["水果"],col:"red"}, "W73":{c:"stirfry",t:["鸡公煲"],col:"red"}, "W74":{c:"stirfry",t:["牛排"],col:"white"}, "W75":{c:"hotpot",t:["自助", "鱼", "牛蛙"],col:"white"}, "W76":{c:"drinks",t:["饮品"],col:"purple"}, "W77":{c:"noodles",t:["粉", "米线"],col:"blue"}, "W78":{c:"drinks",t:["甜点蛋糕"],col:"blue"}, "W80":{c:"stirfry",t:["饭"],col:"green"}, "W82":{c:"stirfry",t:["猪脚饭", "饭"],col:"blue"}, "W83":{c:"stirfry",t:["炒菜"],col:"yellow"}, "W84":{c:"hotpot",t:["自助", "火锅"],col:"rainbow"}, "W86":{c:"hotpot",t:["粉", "羊"],col:"purple"}, "W88":{c:"noodles",t:["粉", "米线"],col:"red"}, "W89":{c:"bbq",t:["炸物", "鸡"],col:"pink"}, "W90":{c:"hotpot",t:["粉"],col:"white"}, "W91":{c:"hotpot",t:["粉"],col:"blue"}, "W94":{c:"drinks",t:["甜点蛋糕"],col:"yellow"}, "W95":{c:"noodles",t:["面", "饭"],col:"green"}, "W96":{c:"hotpot",t:["粉"],col:"red"}, "W97":{c:null,t:[],col:"orange"}, "W98":{c:"hotpot",t:["炒粉"],col:"red"}, "W99A":{c:"drinks",t:["甜点蛋糕"],col:"orange"}, "W99B":{c:"snacks",t:["鲜肉饼"],col:"blue"} };
+    shopSlots.forEach(function(s){ var o=USER_OVERRIDES[s.code]; if(o && o.col) s.color = o.col; });
+    function classifyShop(name, code){
+      if (code && USER_OVERRIDES[code]){
+        var o = USER_OVERRIDES[code];
+        return {category: o.c, tags: o.t};
+      }
       if (!name) return null;
       if (OVERRIDES[name]) return OVERRIDES[name];
       if (hasWord(name, NON_FOOD_WORDS)) return null;
@@ -773,9 +781,9 @@
       else if (slot.kind!=="shop") note = '<p class="note">'+(isBigPlaza(slot) ? "广场空地，不是店铺；广场边同排从左到右开着糯叽叽星球、土家鲜肉饼、云南食野，店门都朝向广场" : (FACILITY_NOTE[slot.kind]||""))+'</p>';
       var chips = "";
       if (slot.kind==="shop"){
-        var info = classifyShop(slot.name);
+        var info = classifyShop(slot.name, slot.code);
         var parts = [];
-        if (info){ var cat = categoryOf(info.category); parts.push('<span class="chip-pill" style="background:'+cat.bg+';color:'+cat.text+'">'+cat.label+'</span>');
+        if (info){ var cat = info.category ? categoryOf(info.category) : null; if (cat) parts.push('<span class="chip-pill" style="background:'+cat.bg+';color:'+cat.text+'">'+cat.label+'</span>');
           info.tags.forEach(function(t){ parts.push('<span class="chip-tag">'+esc(t)+'</span>'); }); }
         if (slot.isPremium) parts.push('<span class="chip-premium">★ 精品店</span>');
         if (parts.length) chips = '<div class="chips">'+parts.join("")+'</div>';
@@ -860,7 +868,7 @@
       var picker = "";
       if (catPicker && !rolling){
         var counts = CATEGORIES.map(function(c){
-          return shopSlots.filter(function(s){ var i=classifyShop(s.name); return i && i.category===c.key; }).length;
+          return shopSlots.filter(function(s){ var i=classifyShop(s.name, s.code); return i && i.category===c.key; }).length;
         });
         var nodes = CATEGORIES.map(function(c,i){
           var ang = (i*60-90)*Math.PI/180, r = 88;
@@ -902,7 +910,7 @@
     function rollDice(die, category){
       if (rolling) return;
       var pool = die==="gold" ? premiumSlots : (category
-        ? shopSlots.filter(function(s){ var i=classifyShop(s.name); return i && i.category===category; })
+        ? shopSlots.filter(function(s){ var i=classifyShop(s.name, s.code); return i && i.category===category; })
         : shopSlots);
       if (!pool.length){
         diceResult=null;
@@ -933,7 +941,7 @@
 
     /* ═══════════ 搜索 ═══════════ */
     function shopRowHTML(slot){
-      var info = classifyShop(slot.name);
+      var info = classifyShop(slot.name, slot.code);
       var cat = info ? categoryOf(info.category) : null;
       return '<button type="button" class="shop-row" data-open="'+slot.id+'" aria-label="'+esc(slot.name)+"，铺位 "+slot.code+"，查看详情"+'">'
         + '<span class="code">'+slot.code+'</span>'
@@ -959,7 +967,7 @@
       var state = {q:"", tag:null};
       function renderBody(){
         var body = document.getElementById("searchBody");
-        var classified = shopSlots.map(function(s){ return {slot:s, info:classifyShop(s.name)}; });
+        var classified = shopSlots.map(function(s){ return {slot:s, info:classifyShop(s.name, s.code)}; });
         var tagCounts = {};
         classified.forEach(function(c){ if (c.info) c.info.tags.forEach(function(t){ tagCounts[t]=(tagCounts[t]||0)+1; }); });
         var tags = Object.keys(tagCounts).sort(function(a,b){ return tagCounts[b]-tagCounts[a]; });
@@ -981,7 +989,7 @@
         var results = null;
         if (q){
           results = classified.filter(function(c){
-            return (c.slot.name||"").indexOf(q)>=0 || (c.info && (categoryOf(c.info.category).label.indexOf(q)>=0 || c.info.tags.some(function(t){ return t.indexOf(q)>=0; })));
+            return (c.slot.name||"").indexOf(q)>=0 || (c.info && ((c.info.category ? categoryOf(c.info.category).label : "").indexOf(q)>=0 || c.info.tags.some(function(t){ return t.indexOf(q)>=0; })));
           });
         } else if (state.tag){
           results = classified.filter(function(c){
