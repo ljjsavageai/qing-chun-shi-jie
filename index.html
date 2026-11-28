@@ -280,6 +280,9 @@
       .ad-poster-btn{display:block;width:100%;margin-top:.75rem;cursor:zoom-in;min-height:0}
       .ad-poster-btn img{width:100%;border-radius:.75rem}
       .ad-hint{margin:.75rem 0 0;text-align:center;font-size:.875rem;color:var(--dim)}
+      .ad-call{margin:.75rem 0 0;font-size:.9375rem;line-height:1.7}
+      .ad-qr{margin:.875rem auto 0;max-width:13.5rem}
+      .ad-qr img{width:100%;border-radius:.75rem;outline:1px solid var(--border)}
       .ad-enter{display:block;width:100%;padding:.375rem;font-size:.875rem;color:var(--dim);min-height:2.25rem}
       .zoom-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);padding:.75rem}
       .zoom-wrap img{position:relative;max-height:82dvh;width:auto;max-width:100%;border-radius:.5rem;object-fit:contain}
@@ -1195,19 +1198,20 @@
       });
     }
 
-    /* ═══════════ 开屏海报广告（每天只弹一次） ═══════════ */
+    /* ═══════════ 开屏征集广告（每天只弹一次）：征集店铺招牌照片 ═══════════ */
     function showPosterAd(){
       var today = localDateStr(new Date());
-      var seenKey = 'qsj-ad-' + today;
+      var seenKey = 'qsj-ad2-' + today;
       if (localStorage.getItem(seenKey)) return;
       localStorage.setItem(seenKey, '1');
       overlayRoot.innerHTML =
-        '<div class="overlay" role="dialog" aria-modal="true" aria-label="青春食街海报">'
-        + '<button type="button" class="backdrop" data-close aria-label="关闭海报"></button>'
+        '<div class="overlay" role="dialog" aria-modal="true" aria-label="青春食街：帮忙补店铺照片">'
+        + '<button type="button" class="backdrop" data-close aria-label="关闭"></button>'
         + '<div class="center-wrap"><div class="ad-card">'
         + '<div class="ad-head"><span class="k">青春食街</span><button type="button" class="close-x" data-close aria-label="关闭">×</button></div>'
-        + '<div class="ad-poster-btn"><img src="poster.jpg" alt="青春食街宣传海报：一条街，吃遍上百家，扫码进入美食街" /></div>'
-        + '<p class="ad-hint">长按保存海报，扫码随时回来，也能发给朋友</p>'
+        + '<p class="ad-call">这条街有 237 家店，不少店的招牌照片和菜单还是空的。如果你有最喜欢的店，路过时随手拍一张招牌发给我，扫下面的二维码加我微信就行。你的一张照片，就能让这家店被更多同学看到。</p>'
+        + '<div class="ad-qr"><img src="my-qr.jpg" alt="我的微信二维码：扫码加微信，把喜欢的店铺招牌照片发给我" /></div>'
+        + '<p class="ad-hint">长按保存二维码，扫码加微信</p>'
         + '<button type="button" class="ad-enter" data-close>进入美食街 ›</button>'
         + '</div></div></div>';
       lockScroll(true);
