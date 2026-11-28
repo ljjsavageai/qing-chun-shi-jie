@@ -54,7 +54,7 @@
       header.head-collapsed .head-collapsed-bar{display:flex}
 
       /* ── Dice ───────────────────────────────────────────── */
-      .dice-toggle-row{display:flex;justify-content:center;gap:.5rem;padding-bottom:.25rem}
+      .dice-toggle-row{display:flex;justify-content:center;flex-wrap:wrap;gap:.5rem;padding-bottom:.25rem}
       .dice-toggle{display:flex;align-items:center;gap:.5rem;border-radius:999px;padding:.25rem .75rem .25rem .25rem;font-size:.875rem;font-weight:500;min-height:2.25rem}
       .dice-toggle:focus-visible,.search-bar:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       .mini-die{width:2.25rem;height:2.25rem;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,.18);outline:1px solid rgba(0,0,0,.15);
@@ -234,6 +234,13 @@
       .pk-vs{flex-shrink:0;align-self:center;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.6875rem;font-weight:700}
       .pk-next{display:block;width:100%;padding:.375rem;font-size:.875rem;color:var(--dim);min-height:2.25rem}
       .pk-note{margin:.5rem 0 0;text-align:center;font-size:.75rem;color:var(--dim)}
+      .wish-btn{border-radius:999px;padding:.5rem 1.125rem;font-size:.875rem;font-weight:600;background:#fff;color:var(--accent);outline:2px solid var(--accent);min-height:2.5rem;cursor:pointer}
+      .wish-btn.saved{background:var(--accent);color:#fff}
+      .wish-item{display:flex;align-items:center;gap:.5rem;border:1px solid var(--border);border-radius:.75rem;background:var(--bg);padding:.625rem .75rem;margin-top:.5rem}
+      .wish-item .nm{flex:1;min-width:0;text-align:left;font-size:.9375rem;font-weight:600;background:none;border:none;padding:0;cursor:pointer;color:inherit}
+      .wish-item .code{font-size:.75rem;color:var(--dim)}
+      .wish-x{flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:1rem;line-height:1;cursor:pointer}
+      .wish-share-box{margin-top:.75rem;padding:.75rem;border-radius:.75rem;background:var(--bg);font-size:.875rem;line-height:1.6;white-space:pre-wrap;word-break:break-all}
       .close-x{border-radius:999px;padding:0 .5rem;font-size:1.125rem;line-height:1;color:var(--dim);flex-shrink:0}
       .chips{display:flex;flex-wrap:wrap;gap:.375rem;margin-top:.75rem}
       .chip-pill{border-radius:999px;padding:.25rem .625rem;font-size:.75rem;font-weight:600}
@@ -353,6 +360,7 @@
             <span aria-hidden="true" id="diceCaret" style="font-size:.75rem;color:var(--dim)">▾</span>
           </button>
           <button type="button" class="pk-toggle" id="pkToggle" aria-label="打开人气 PK：两家店选一家，帮它涨人气">人气 PK</button>
+          <button type="button" class="pk-toggle" id="wishToggle" aria-label="打开我的想吃清单">我的清单</button>
         </div>
         <div id="dicePanelSlot"></div>
         <button type="button" class="search-bar" id="searchOpenBtn" aria-label="打开搜索：搜店名或美食标签">
@@ -895,11 +903,13 @@
         + chips + detail
         + (slot.kind==="shop" ? '<p class="note" id="shopViewCount">本店浏览量：加载中…</p>' : '')
         + (slot.kind==="shop" ? '<div class="like-row"><button type="button" class="like-btn" id="likeBtn">👍 点赞</button><span class="note" id="shopLikeCount">点赞：加载中…</span><span class="note" id="shopPkCount">人气票：加载中…</span></div>' : '')
+        + (slot.kind==="shop" ? '<div class="like-row"><button type="button" class="wish-btn" id="wishBtn">＋ 想吃</button><span class="note">收进我的清单，只存在你这台手机里</span></div>' : '')
         + '</section></div></div>';
       lockScroll(true);
       recordShopView(slot);
       loadShopLikes(slot);
       loadShopPkVotes(slot);
+      setupWishBtn(slot);
       overlayRoot.querySelectorAll("[data-close]").forEach(function(b){ b.addEventListener("click", closeTop); });
     }
 
@@ -923,6 +933,8 @@
     document.getElementById("qrMineBtn").addEventListener("click", function(){ openQr("mine"); });
     document.getElementById("qrVoteBtn").addEventListener("click", function(){ openQr("vote"); });
     document.getElementById("pkToggle").addEventListener("click", openPk);
+    document.getElementById("wishToggle").addEventListener("click", openWishlist);
+    refreshWishToggle();
 
     /* 开屏广告已删除 2026-11-27 */
     /* ── 街道点击（事件委托） ── */
@@ -1314,6 +1326,127 @@
         renderPk();
       });
     }
+
+    /* ═══════════ 我的想吃清单：只存本机 localStorage，别人看不到 ═══════════ */
+    var byCode = {};
+    shopSlots.forEach(function(s){ byCode[s.code] = s; });
+    function getWishlist(){
+      try { var v = JSON.parse(localStorage.getItem('qsj-wishlist') || '[]'); return Array.isArray(v) ? v : []; }
+      catch(e){ return []; }
+    }
+    function saveWishlist(list){ try { localStorage.setItem('qsj-wishlist', JSON.stringify(list)); } catch(e){} }
+    function isWishlisted(code){ return getWishlist().indexOf(code) >= 0; }
+    function refreshWishToggle(){
+      var btn = document.getElementById('wishToggle');
+      if (!btn) return;
+      var n = getWishlist().length;
+      btn.textContent = n > 0 ? '我的清单（' + n + '）' : '我的清单';
+    }
+    function setupWishBtn(slot){
+      var btn = document.getElementById('wishBtn');
+      if (!btn || !slot || slot.kind!=='shop') return;
+      var update = function(){
+        var saved = isWishlisted(slot.code);
+        btn.textContent = saved ? '已收藏' : '＋ 想吃';
+        btn.classList.toggle('saved', saved);
+      };
+      update();
+      btn.addEventListener('click', function(){
+        var list = getWishlist();
+        var i = list.indexOf(slot.code);
+        if (i >= 0) list.splice(i, 1); else list.push(slot.code);
+        saveWishlist(list);
+        update();
+        refreshWishToggle();
+      });
+    }
+    function wishShareText(){
+      var names = getWishlist().map(function(c){ var s = byCode[c]; return s ? s.name : c; });
+      return '我的青春食街想吃清单（' + names.length + '家）：' + names.join('、') + '\n一起来吃：https://ljjsavageai.github.io/qing-chun-shi-jie/';
+    }
+    function renderWishlist(){
+      var list = getWishlist();
+      var items = '';
+      if (!list.length){
+        items = '<p class="pk-note">还没收藏，去店里点“想吃”就收进来。</p>';
+      } else {
+        list.forEach(function(code){
+          var s = byCode[code];
+          if (!s) return;
+          items += '<div class="wish-item">'
+            + '<button type="button" class="nm" data-open-detail="'+esc(code)+'">' + esc(s.name) + '</button>'
+            + '<span class="code">' + esc(code) + '</span>'
+            + '<button type="button" class="wish-x" data-remove="'+esc(code)+'" aria-label="从清单里去掉 '+esc(s.name)+'">×</button>'
+            + '</div>';
+        });
+      }
+      overlayRoot.innerHTML =
+        '<div class="overlay" role="dialog" aria-modal="true" aria-label="我的想吃清单">'
+        + '<button type="button" class="backdrop" data-close aria-label="关闭我的清单"></button>'
+        + '<div class="center-wrap"><div class="pk-card">'
+        + '<div class="ad-head"><span class="k">我的清单</span><button type="button" class="close-x" data-close aria-label="关闭">×</button></div>'
+        + '<p class="pk-sub">存在你这台手机里，别人看不到</p>'
+        + items
+        + '<button type="button" class="pk-next" id="wishShareBtn">分享清单</button>'
+        + '<div class="wish-share-box" id="wishShareBox" style="display:none"></div>'
+        + '<button type="button" class="pk-next" id="wishCopyBtn" style="display:none">复制清单文字</button>'
+        + (list.length ? '<button type="button" class="pk-next" id="wishClearBtn" style="font-size:.75rem">清空清单</button>' : '')
+        + '</div></div></div>';
+      lockScroll(true);
+      overlayRoot.querySelectorAll("[data-close]").forEach(function(x){ x.addEventListener("click", closeTop); });
+      overlayRoot.querySelectorAll("[data-open-detail]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var s = byCode[b.getAttribute("data-open-detail")];
+          if (s) openDetail(s);
+        });
+      });
+      overlayRoot.querySelectorAll("[data-remove]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var l2 = getWishlist();
+          var i = l2.indexOf(b.getAttribute("data-remove"));
+          if (i >= 0) l2.splice(i, 1);
+          saveWishlist(l2);
+          refreshWishToggle();
+          renderWishlist();
+        });
+      });
+      document.getElementById("wishShareBtn").addEventListener("click", function(){
+        var box = document.getElementById("wishShareBox");
+        var copyBtn = document.getElementById("wishCopyBtn");
+        if (box.style.display === 'none'){
+          box.textContent = list.length ? wishShareText() : '清单还是空的，先收藏几家再分享。';
+          box.style.display = 'block';
+          if (list.length) copyBtn.style.display = 'block';
+        } else {
+          box.style.display = 'none';
+          copyBtn.style.display = 'none';
+        }
+      });
+      document.getElementById("wishCopyBtn").addEventListener("click", function(){
+        var txt = wishShareText();
+        var done = function(ok){
+          var b = document.getElementById("wishCopyBtn");
+          if (b) b.textContent = ok ? '已复制，去粘贴发给朋友' : '复制失败，长按文字自己复制';
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(function(){ done(true); }, function(){ done(false); });
+        } else done(false);
+      });
+      var clearBtn = document.getElementById("wishClearBtn");
+      if (clearBtn){
+        clearBtn.addEventListener("click", function(){
+          if (clearBtn.getAttribute("data-confirm") === "1"){
+            saveWishlist([]);
+            refreshWishToggle();
+            renderWishlist();
+          } else {
+            clearBtn.setAttribute("data-confirm", "1");
+            clearBtn.textContent = "确定清空？";
+          }
+        });
+      }
+    }
+    function openWishlist(){ renderWishlist(); }
 
     /* ═══════════ 开屏征集广告（每天只弹一次）：征集店铺招牌照片 ═══════════ */
     function showPosterAd(){
