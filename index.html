@@ -231,6 +231,11 @@
         background:#f7faf3;padding:2rem .75rem;font-size:.875rem;color:#7b8b7c;text-align:center}
       .placeholder.tall{padding:3.5rem .75rem}
       .sign-img{width:100%;border-radius:.75rem;object-fit:cover;box-shadow:0 1px 2px rgba(0,0,0,.08);outline:1px solid var(--border)}
+      .menu-list{list-style:none;margin:0;padding:0}
+      .menu-list li{display:flex;justify-content:space-between;gap:.75rem;padding:.5rem .25rem;border-bottom:1px solid var(--border);font-size:.9375rem}
+      .menu-list li:last-child{border-bottom:none}
+      .menu-list b{font-weight:700;white-space:nowrap}
+      .menu-note{margin:.5rem .25rem 0;font-size:.875rem;color:var(--dim)}
 
       /* full-page overlays (search) */
       .page-overlay{position:fixed;inset:0;z-index:50;overflow-y:auto;background:var(--bg)}
@@ -810,6 +815,18 @@
       restroom:"公共卫生间，不是店铺",
       parking:"小型自行车停车场，占用一个标签，不是店铺"
     };
+    /* 每家店的招牌照片 / 菜单 / 特色菜：有就显示，没有就显示补充提示。
+       图片放仓库根目录，点开详情才加载，不拖首页速度。 */
+    var SHOP_MEDIA = {
+      "E190": {
+        sign: "changsha-choudoufu-sign.webp",
+        signAlt: "长沙臭豆腐店面招牌照片：红色招牌上白色大字“长沙臭豆腐”，旁边有圆形 logo 和一碗臭豆腐的图案",
+        dish: "changsha-choudoufu-dish.webp",
+        dishAlt: "长沙臭豆腐招牌菜：一碗臭豆腐，黑白豆腐块浇红辣椒酱，配香菜",
+        menu: [["小份臭豆腐（6块）", "6元"], ["大份臭豆腐（10块）", "10元"]],
+        menuNote: "黑白两款，可以双拼"
+      }
+    };
     function openDetail(slot){
       var sideList = slot.side==="west" ? SLOTS.filter(function(s){return s.side==="west";}) : eastSlots;
       var idx = sideList.indexOf(slot);
@@ -831,12 +848,22 @@
       var detail = "";
       if (slot.kind==="shop"){
         var tip = '补充或反馈请联系网页最上面的客服二维码';
+        var media = SHOP_MEDIA[slot.code] || null;
         var sign = slot.name==="茶瀑布"
           ? '<img class="sign-img" loading="lazy" src="cha-pubu-sign.jpg" alt="茶瀑布店面招牌照片：绿色招牌上白色大字“茶瀑布”，旁边写着“原叶鲜奶茶”" />'
+          : (media && media.sign
+            ? '<img class="sign-img" loading="lazy" src="'+media.sign+'" alt="'+esc(media.signAlt)+'" />'
+            : '<div class="placeholder tall">'+tip+'</div>');
+        var menu = (media && media.menu)
+          ? '<ul class="menu-list">' + media.menu.map(function(m){ return '<li><span>'+esc(m[0])+'</span><b>'+esc(m[1])+'</b></li>'; }).join("") + '</ul>'
+            + (media.menuNote ? '<p class="menu-note">'+esc(media.menuNote)+'</p>' : '')
+          : '<div class="placeholder">'+tip+'</div>';
+        var dish = (media && media.dish)
+          ? '<img class="sign-img" loading="lazy" src="'+media.dish+'" alt="'+esc(media.dishAlt)+'" />'
           : '<div class="placeholder tall">'+tip+'</div>';
         detail = '<div class="detail-sec"><h3>招牌</h3>'+sign+'</div>'
-          + '<div class="detail-sec"><h3>菜单</h3><div class="placeholder">'+tip+'</div></div>'
-          + '<div class="detail-sec"><h3>特色菜</h3><div class="placeholder tall">'+tip+'</div></div>';
+          + '<div class="detail-sec"><h3>菜单</h3>'+menu+'</div>'
+          + '<div class="detail-sec"><h3>特色菜</h3>'+dish+'</div>';
       }
       overlayRoot.innerHTML =
         '<div class="overlay" role="dialog" aria-modal="true" aria-label="铺位 '+slot.code+' 详情">'
